@@ -1,11 +1,11 @@
 import { getUsers } from "../common/placeholder";
 
 
-function main(){
-    getUsers().then(users=>{
+export function main(){
+    return getUsers().then(users=>{
         console.dir(users,{depth:null});
+        return users;
     }).catch(e=>{
-        console.log(e);
+        console.error(`Error while calling method: ${e}`);
     }); 
 }
-main();
