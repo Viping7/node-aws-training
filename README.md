@@ -12,3 +12,16 @@ cd /lib/assignment
 tsx task1.ts
 
 ```
+
+## Task 2
+
+Nodejs and Typescript code to calls 2 or more 
+api's parallely(NOTE: use typescript interfaces,types, promises, async and await)
+
+To Run 
+
+```
+cd /lib/assignment
+tsx task2.ts
+
+```

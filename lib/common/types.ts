@@ -25,3 +25,10 @@ export interface User {
   website: string;
   company: Company;
 }
+
+export interface Todo {
+  userId: number;
+  id: number;
+  title: string;
+  completed: boolean;
+}
