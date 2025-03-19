@@ -25,3 +25,44 @@ cd /lib/assignment
 tsx task2.ts
 
 ```
+
+## Task 3
+
+Nodejs and Typescript code to read, create, update and delete a file in three ways - synchronous, asynchronous and streams
+To Run 
+
+```
+cd /lib/assignment/task3
+
+```
+
+Uncomment required function and run
+
+### Create file
+
+```
+tsx create.ts
+
+```
+
+### Read file
+
+```
+tsx read.ts
+
+```
+
+
+### Update file
+
+```
+tsx update.ts
+
+```
+
+### Delete file
+
+```
+tsx delete.ts
+
+```
