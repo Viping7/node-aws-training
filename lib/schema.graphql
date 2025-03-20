@@ -1,22 +1,17 @@
 schema {
   query: Query
+  mutation: Mutation
 }
 
-type Address {
-  street: String!
-  suite: String
-  city: String!
-  zipcode: String!
-}
-
-type Company {
-  name: String!
-  catchPhrase: String
-  bs: String
+type Mutation {
+  createUser(user: UserInput!): User
+  updateUser(id:Int!, user: UpdateUserInput!): UpdateUserOutput
+  deleteUser(id:Int!): Int
 }
 
 type Query {
   getUsers: [User!]
+  getUser(id: Int!): User
 }
 
 type User {
@@ -25,8 +20,34 @@ type User {
   name: String!
   username: String!
   email: String!
-  address: Address
   phone: String
   website: String
-  company: Company
+}
+
+input UserInput {
+  version: String!
+  id: Int!
+  name: String!
+  username: String!
+  email: String!
+  phone: String
+  website: String
+}
+
+type UpdateUserOutput {
+  version: String
+  name: String
+  username: String
+  email: String
+  phone: String
+  website: String
+}
+
+input UpdateUserInput {
+  version: String
+  name: String
+  username: String
+  email: String
+  phone: String
+  website: String
 }

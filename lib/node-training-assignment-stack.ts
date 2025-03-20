@@ -1,6 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
-import { AuthorizationType, Definition, GraphqlApi } from 'aws-cdk-lib/aws-appsync';
+import { AuthorizationType, Definition, DynamoDbDataSource, GraphqlApi, LambdaDataSource } from 'aws-cdk-lib/aws-appsync';
 import { AttributeType, Table } from 'aws-cdk-lib/aws-dynamodb';
+import { ManagedPolicy, Role } from 'aws-cdk-lib/aws-iam';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { BlockPublicAccess, Bucket, BucketEncryption } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
@@ -11,18 +12,28 @@ export class NodeTrainingAssignmentStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    new NodejsFunction(this, 'AssignmentFunction', {
-      entry: 'lib/handlers/assignment-function.ts'
-    })
-
-    new Table(this, 'AssignmentTable', {
+   
+    
+    const table = new Table(this, 'AssignmentTable', {
       partitionKey: {
         name: 'id',
-        type: AttributeType.STRING,
+        type: AttributeType.NUMBER,
       }
     })
 
-    new Bucket(this, 'AssignmentBucket',{
+    const lambda = new NodejsFunction(this, 'GraphQlResolverFunction', {
+      entry: 'lib/handlers/graphql-resolver.ts',
+      environment: {
+        TABLE_NAME: table.tableName
+      }
+    })
+
+    lambda.role?.addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName('AmazonDynamoDBFullAccess'));
+
+
+   
+
+    new Bucket(this, 'AssignmentBucket', {
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
       encryption: BucketEncryption.S3_MANAGED,
       enforceSSL: true,
@@ -30,7 +41,7 @@ export class NodeTrainingAssignmentStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.RETAIN,
     })
 
-    new GraphqlApi(this, 'AssignmentGraphQlAPI', {
+    const api = new GraphqlApi(this, 'AssignmentGraphQlAPI', {
       name: 'AssignmentGraphQlAPI',
       definition: Definition.fromFile(path.join(__dirname, 'schema.graphql')),
       authorizationConfig: {
@@ -40,5 +51,46 @@ export class NodeTrainingAssignmentStack extends cdk.Stack {
       },
       xrayEnabled: true,
     });
+
+
+    const dataSource = new LambdaDataSource(this, 'AssignmentDataSource', {
+      api: api,
+      description: 'DynamoDB DataSource',
+      name: "AssignmentDataSource",
+      lambdaFunction: lambda
+    })
+
+    new NodejsFunction(this, 'AssignmentFunction', {
+      entry: 'lib/handlers/assignment-function.ts',
+      environment:{
+        API_URL: api.graphqlUrl,
+        API_KEY: api.apiKey || ''
+      }
+    })
+
+    dataSource.createResolver("CreateUserResolver", {
+      typeName: "Mutation",
+      fieldName: "createUser"
+    })
+
+    dataSource.createResolver("GetUserResolver", {
+      typeName: "Query",
+      fieldName: "getUsers"
+    })
+
+    dataSource.createResolver("GetUserByIdResolver", {
+      typeName: "Query",
+      fieldName: "getUser"
+    })
+    dataSource.createResolver("UpdateUserByIdResolver", {
+      typeName: "Mutation",
+      fieldName: "updateUser"
+    })
+
+    dataSource.createResolver("DeleteUserByIdResolver", {
+      typeName: "Mutation",
+      fieldName: "deleteUser"
+    })
+
   }
 }

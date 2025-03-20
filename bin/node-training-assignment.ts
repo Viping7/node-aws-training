@@ -4,6 +4,9 @@ import { NodeTrainingAssignmentStack } from '../lib/node-training-assignment-sta
 
 const app = new cdk.App();
 new NodeTrainingAssignmentStack(app, 'NodeTrainingAssignmentStack', {
+  env:{
+    account:'404771918283'
+  }
   /* If you don't specify 'env', this stack will be environment-agnostic.
    * Account/Region-dependent features and context lookups will not work,
    * but a single synthesized template can be deployed anywhere. */
