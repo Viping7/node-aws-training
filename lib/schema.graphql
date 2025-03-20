@@ -1,0 +1,32 @@
+schema {
+  query: Query
+}
+
+type Address {
+  street: String!
+  suite: String
+  city: String!
+  zipcode: String!
+}
+
+type Company {
+  name: String!
+  catchPhrase: String
+  bs: String
+}
+
+type Query {
+  getUsers: [User!]
+}
+
+type User {
+  version: String!
+  id: Int!
+  name: String!
+  username: String!
+  email: String!
+  address: Address
+  phone: String
+  website: String
+  company: Company
+}
