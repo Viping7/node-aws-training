@@ -30,16 +30,23 @@ export class NodeTrainingAssignmentStack extends cdk.Stack {
 
     lambda.role?.addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName('AmazonDynamoDBFullAccess'));
 
-
-   
-
-    new Bucket(this, 'AssignmentBucket', {
+    
+    const bucket = new Bucket(this, 'AssignmentBucket', {
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
       encryption: BucketEncryption.S3_MANAGED,
       enforceSSL: true,
       versioned: true,
       removalPolicy: cdk.RemovalPolicy.RETAIN,
     })
+
+    const s3OperationLambda = new NodejsFunction(this, 'S3OperationLambdaFunction', {
+      entry: 'lib/handlers/s3-operations.ts',
+      environment: {
+        BUCKET_NAME: bucket.bucketName
+      }
+    })
+
+    s3OperationLambda.role?.addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName('AmazonS3FullAccess'));
 
     const api = new GraphqlApi(this, 'AssignmentGraphQlAPI', {
       name: 'AssignmentGraphQlAPI',
