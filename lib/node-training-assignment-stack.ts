@@ -1,9 +1,10 @@
 import * as cdk from 'aws-cdk-lib';
 import { AuthorizationType, Definition, DynamoDbDataSource, GraphqlApi, LambdaDataSource } from 'aws-cdk-lib/aws-appsync';
 import { AttributeType, Table } from 'aws-cdk-lib/aws-dynamodb';
+import { HttpMethod } from 'aws-cdk-lib/aws-events';
 import { ManagedPolicy, Role } from 'aws-cdk-lib/aws-iam';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
-import { BlockPublicAccess, Bucket, BucketEncryption } from 'aws-cdk-lib/aws-s3';
+import { BlockPublicAccess, Bucket, BucketAccessControl, BucketEncryption, HttpMethods, ObjectOwnership } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import path = require('path');
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
@@ -33,10 +34,28 @@ export class NodeTrainingAssignmentStack extends cdk.Stack {
     
     const bucket = new Bucket(this, 'AssignmentBucket', {
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+      publicReadAccess: false,
+      objectOwnership: ObjectOwnership.BUCKET_OWNER_PREFERRED,
       encryption: BucketEncryption.S3_MANAGED,
       enforceSSL: true,
       versioned: true,
       removalPolicy: cdk.RemovalPolicy.RETAIN,
+      cors:[
+        {
+          allowedMethods: [
+           HttpMethods.GET,
+           HttpMethods.PUT,
+           HttpMethods.POST,
+           HttpMethods.DELETE
+          ],
+          allowedOrigins: [
+            '*'
+          ],
+          allowedHeaders: [
+            '*'
+          ]
+        }
+      ]
     })
 
     const s3OperationLambda = new NodejsFunction(this, 'S3OperationLambdaFunction', {
